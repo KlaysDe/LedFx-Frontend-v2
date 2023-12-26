@@ -35,6 +35,11 @@ const AlphaFeatures = () => {
             checked={features.mqtt_hass}
             onChange={() => setFeatures('mqtt_hass', !features.mqtt_hass)}
           />
+          <SettingsRow
+            title="MQTT-V2"
+            checked={features.mqtt_v2}
+            onChange={() => setFeatures('mqtt_v2', !features.mqtt_v2)}
+          />
         </>
       )}
       {showFeatures.wled && (
