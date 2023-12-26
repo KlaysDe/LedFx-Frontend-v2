@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Input, Divider } from '@mui/material'
+import { Input, Divider, Select, MenuItem } from '@mui/material'
 import { SettingsSlider, SettingsRow } from './SettingsComponents'
 import useStore from '../../store/useStore'
 import useSliderStyles from '../../components/SchemaForm/components/Number/BladeSlider.styles'
@@ -43,8 +43,36 @@ const UICard = () => {
     getSystemConfig()
   }, [])
 
+  const schemaTransmissionMode = useStore(
+    (state) => state?.schemas?.core?.schema.properties.transmission_mode
+  )
+
   return (
     <>
+      <SettingsRow
+        title={schemaTransmissionMode?.title}
+        step="zero"
+        value={fps}
+      >
+        <Select
+          disableUnderline
+          variant="standard"
+          defaultValue={
+            config.transmission_mode ||
+            schemaTransmissionMode?.default ||
+            'compressed'
+          }
+          onChange={(e) =>
+            setSystemSetting('transmission_mode', e.target.value)
+          }
+        >
+          {schemaTransmissionMode?.enum?.map((item: any) => (
+            <MenuItem key={item} value={item}>
+              {item}
+            </MenuItem>
+          ))}
+        </Select>
+      </SettingsRow>
       <SettingsRow title="Frontend FPS" step="two" value={fps}>
         <SettingsSlider
           value={fps}
@@ -87,7 +115,8 @@ const UICard = () => {
           step={1}
           valueLabelDisplay="auto"
           min={1}
-          max={300}
+          max={4096}
+          marks={[{ value: 300, label: null }]}
           onChangeCommitted={(_e: any, val: any) =>
             setSystemSetting('visualisation_maxlen', val)
           }
@@ -115,7 +144,7 @@ const UICard = () => {
           }}
           inputProps={{
             min: 1,
-            max: 300,
+            max: 4096,
             type: 'number',
             'aria-labelledby': 'input-slider'
           }}

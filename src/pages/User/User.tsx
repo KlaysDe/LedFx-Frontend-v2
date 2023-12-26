@@ -19,12 +19,13 @@ import {
 } from '@mui/material'
 import {
   AccessTime,
-  GitHub,
   CloudDownload,
   CloudUpload,
   EmojiEventsOutlined,
+  GitHub,
   Star,
-  StarOutline
+  StarOutline,
+  Tune
 } from '@mui/icons-material'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
@@ -35,6 +36,7 @@ import Typography from '@mui/material/Typography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import useStore from '../../store/useStore'
 import Popover from '../../components/Popover/Popover'
+import AvatarPicker from './AvatarPicker/AvatarPicker'
 
 const User = () => {
   const theme = useTheme()
@@ -65,13 +67,16 @@ const User = () => {
   // const setTrophies = useStore((state) => state.user.setTrophies)
   // const starred = useStore((state) => state.user.starred)
   // const setStarred = useStore((state) => state.user.setStarred)
+
   const infoAlerts = useStore((state) => state.ui.infoAlerts)
   const setInfoAlerts = useStore((state) => state.ui.setInfoAlerts)
   const getFullConfig = useStore((state) => state.getFullConfig)
   const isLogged = useStore((state) => state.isLogged)
   const importSystemConfig = useStore((state) => state.importSystemConfig)
+  const setSystemConfig = useStore((state) => state.setSystemConfig)
   const scenePL = useStore((state) => state.scenePL)
   const setScenePL = useStore((state) => state.setScenePL)
+  // const [avatar, setAvatar] = useState<undefined | string>(undefined)
 
   const userName = localStorage.getItem('username')
 
@@ -226,9 +231,11 @@ const User = () => {
   }, [starred, cloudEffects, setTrophies])
 
   useEffect(() => {
-    getCloudPresets()
-    getCloudPlaylists()
-    getCloudConfigs()
+    if (isLogged && localStorage.getItem('ledfx-cloud-role') === 'creator') {
+      getCloudPresets()
+      getCloudPlaylists()
+      getCloudConfigs()
+    }
     hasStarred()
   }, [])
 
@@ -258,7 +265,7 @@ const User = () => {
         alignItems="center"
         direction="column"
         gap={2}
-        maxWidth={300}
+        maxWidth={450}
         margin="0 auto"
       >
         <Collapse in={infoAlerts.user}>
@@ -270,8 +277,8 @@ const User = () => {
                 setInfoAlerts('user', false)
             }}
           >
-            LedFx Cloud is a proof of concept and is running on a cheap six bugs
-            a month server.
+            LedFx Cloud is a proof of concept and is running on a cheap six
+            bucks a month server.
             <br />
             Dont expect anything in alpha-state. like if the server crashes the
             data is gone!
@@ -283,25 +290,33 @@ const User = () => {
         <Stack
           direction="row"
           gap={2}
-          maxWidth={300}
+          maxWidth={450}
           alignItems="center"
           margin="0 auto"
           sx={{
             border: '1px solid',
             borderColor: 'text.disabled',
-            borderRadius: '40px',
-            padding: '2px 2rem 2px 5px'
+            borderRadius: '75px',
+            padding: '0 3rem 0 0',
+            minWidth: 350
           }}
         >
-          <GitHub sx={{ fontSize: 'min(25vw, 25vh, 75px)' }} />
+          {localStorage.getItem('ledfx-cloud-role') === 'creator' ? (
+            <AvatarPicker storage="cloud" />
+          ) : (
+            <GitHub sx={{ fontSize: 'min(25vw, 25vh, 150px)' }} />
+          )}
           <Stack
             alignItems="center"
             direction="column"
             gap={2}
-            maxWidth={300}
+            maxWidth={450}
             margin="0 auto"
           >
-            <Typography variant="h5">{userName}</Typography>
+            <Typography variant="h5">
+              {userName !== 'YeonV' ? 'FreeUser' : ''}
+              &nbsp;{userName}&nbsp;
+            </Typography>
             {isLogged ? (
               <Badge
                 sx={{ paddingTop: 2 }}
@@ -317,7 +332,7 @@ const User = () => {
             )}
           </Stack>
         </Stack>
-        <div style={{ width: 300 }}>
+        <div style={{ width: 450 }}>
           <Accordion
             expanded={expanded === 'panel0'}
             onChange={handleChange('panel0')}
@@ -827,6 +842,36 @@ const User = () => {
                           }
                         />
                         {/* <Tooltip title="Load Config"> */}
+                        <Popover
+                          onConfirm={() => {
+                            const { user_presets } = c.config
+                            setSystemConfig({ user_presets }).then(() => {
+                              window.location.href = window.location.href
+                            })
+                          }}
+                          content={
+                            <Stack>
+                              <Typography
+                                sx={{ padding: '0.5rem 1rem 0 1rem' }}
+                              >
+                                overwrite current config?
+                              </Typography>
+                              <Typography
+                                color="text.disabled"
+                                sx={{ padding: '0 1rem 0.5rem 1rem' }}
+                              >
+                                LedFx will restart after
+                              </Typography>
+                            </Stack>
+                          }
+                          type="iconbutton"
+                          color="inherit"
+                          icon={
+                            <Tooltip title="Import Presets from Config">
+                              <Tune />
+                            </Tooltip>
+                          }
+                        />
                         <Popover
                           onConfirm={() => {
                             importSystemConfig(c.config).then(() => {
